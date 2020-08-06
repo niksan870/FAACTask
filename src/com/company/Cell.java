@@ -1,17 +1,18 @@
 package com.company;
 
+// Class for the cell
 public class Cell {
-    private int green;
+    private int targetNum;
 
-    public Cell(int green) {
-        this.green = green;
+    public Cell(int targetNum) {
+        this.targetNum = targetNum;
     }
 
-    public int isGreen() {
-        return green;
+    public int getNum() {
+        return targetNum;
     }
 
-    public void setGreen(int green) {
-        this.green = green;
+    public void setNum(int green) {
+        this.targetNum = green;
     }
 }

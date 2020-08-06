@@ -1,119 +1,112 @@
 package com.company;
 
+import java.io.IOException;
+import java.util.Scanner;
+
 // Grid
 public class Grid {
-    private int width;
-    private int height;
+    private static Scanner scanner = new Scanner(System.in);
+    private int width = 4;
+    private int height = 4;
     private int targetCellX;
     private int targetCellY;
-    private long generation;
-    private long targetCellMaturity = 0;
+    private int[] tempArr;
     private Cell[][] grid;
 
-
-    Grid(Cell[][] grid, int width, int height, int targetCellX, int targetCellY){
+    Grid(Cell[][] grid, int targetCellX, int targetCellY){
         this.grid = grid;
-        this.width = width;
-        this.height = height;
         this.targetCellX = targetCellX;
         this.targetCellY = targetCellY;
-        this.generation = 0;
     }
 
+    // Draw the grid
     public void drawGrid() {
         for(int row = 0; row < grid.length; row++ ){
             for(int col = 0; col < grid[row].length; col++ ){
-//                cellList.add(new Cell(row, col, grid[row][col]));
-                System.out.print(grid[row][col].isGreen() ==0 ? 1 : 0);
+                if (grid[row][col].getNum() >= 10 && grid[row][col].getNum() <= 99) {
+                    System.out.print("(" + grid[row][col].getNum() + ")");
+                } else {
+                    if (grid[row][col].getNum() == 0) {
+                        System.out.print("(  )");
+                    } else {
+                        System.out.print("( " + grid[row][col].getNum() + ")");
+                    }
+                }
                 System.out.print(' ');
             }
             System.out.println();
         }
-        System.out.println("Generation:" + generation);
     }
 
     // Compute the next generation
-    public void nextGeneration(){
+    public void nextGeneration() throws IOException {
         Cell[][] newGrid = new Cell[height][width];
         for(int row = 0; row < height; row++ ){
             for(int col = 0; col < width; col++ ){
-                if (row == targetCellY && col == targetCellX) {
-                    targetCellMaturity += isGreen(grid, row, col) == 1? 1 : 0;
+                if (row == targetCellX && col == targetCellY) {
+                    directionController(grid, row, col);
                 }
-                newGrid[row][col] = new Cell(isGreen(grid, row, col));
+                newGrid[row][col] = new Cell(grid[row][col].getNum());
             }
         }
+        newGrid[tempArr[1]][tempArr[0]] = new Cell(0);
+        newGrid[targetCellY][targetCellX] = new Cell(grid[tempArr[1]][tempArr[0]].getNum());
+
+        targetCellY = tempArr[1];
+        targetCellX = tempArr[0];
         grid = newGrid;
-        generation++;
     }
 
-    // Apply rules
-    private int isGreen(Cell[][] oldGrid, int row, int col){
-        boolean currentGreenCell = oldGrid[row][col].isGreen() == 0;
-
-        // count adjacent neighbours without the current one
-        int greenNeighboursCount = countNeighbors(oldGrid, row, col);
-
-        if(currentGreenCell) {
-            // green cell is surrounded by green neighbours (2,3,6) stays green (1) else red
-            if (greenNeighboursCount == 2 || greenNeighboursCount == 3 || greenNeighboursCount == 6) {
-                return 1;
-            } else {
-                return 0;
-            }
-        } else {
-            // red cell is surrounded by green neighbours (3,6) becomes green (1) else red
-            if ( greenNeighboursCount == 3 || greenNeighboursCount == 6) {
-                return 1;
-            } else {
-                return 0;
-            }
+    private boolean validateIfPossibleMovement(char step, int[] arr) throws IOException {
+        tempArr = setTheUpcomingStep(step, arr);
+        if ((tempArr[0] < 4 && tempArr[0] >= 0) &&
+                (tempArr[1] < 4 && tempArr[1] >= 0)) {
+            return true;
         }
+        return false;
     }
 
 
-    // Check neighbours according to its placement
-    private int countNeighbors(Cell[][] generation, int row, int col) {
-        int numNeighbors = 0;
+    // Check if the path is possible and if so, set the variables for swapping
+    private void directionController(Cell[][] generation, int row, int col) throws IOException {
+        System.out.print("Your next move: ");
+        char step = scanner.next().charAt(0);
+        if (Controls.LEFT.getValue() != step &&
+            Controls.DOWN.getValue() != step &&
+            Controls.RIGHT.getValue() != step &&
+            Controls.UP.getValue() != step  &&
+            Controls.QUIT.getValue() != step) {
 
-        // NW
-        if ((row - 1 >= 0) && (col - 1 >= 0)) {
-//            numNeighbors = generation[row - 1][col - 1].isGreen() ? numNeighbors + 1 : numNeighbors;
-        }
-        // W
-        if ((row >= 0) && (col - 1 >= 0)) {
-//            numNeighbors = generation[row][col - 1].isGreen() ? numNeighbors + 1 : numNeighbors;
-        }
-        // SW
-        if ((row + 1 < generation.length) && (col - 1 >= 0)) {
-//            numNeighbors = generation[row + 1][col - 1].isGreen() ? numNeighbors + 1 : numNeighbors;
-        }
-        // S
-        if ((row + 1 < generation.length) && (col < generation[0].length)) {
-//            numNeighbors = generation[row + 1][col].isGreen() ? numNeighbors + 1 : numNeighbors;
-        }
-        // SE
-        if ((row + 1 < generation.length) && (col + 1 < generation[0].length)) {
-//            numNeighbors = generation[row + 1][col + 1].isGreen() ? numNeighbors + 1 : numNeighbors;
-        }
-        // E
-        if ((row < generation.length) && (col + 1 < generation[0].length)) {
-//            numNeighbors = generation[row][col + 1].isGreen() ? numNeighbors + 1 : numNeighbors;
-        }
-        // NE
-        if ((row - 1 >= 0) && (col + 1 < generation[0].length)) {
-//            numNeighbors = generation[row - 1][col + 1].isGreen() ? numNeighbors + 1 : numNeighbors;
-        }
-        // N
-        if ((row - 1 >= 0) && (col < generation[0].length)) {
-//            numNeighbors = generation[row - 1][col].isGreen() ? numNeighbors + 1 : numNeighbors;
+            System.out.println("Only 'a,s,d,w or q' are valid options");
+            directionController(generation, row, col);
         }
 
-        return numNeighbors;
+        int[] arrHolder = new int[]{targetCellX, targetCellY};
+        boolean isOutOfBounds = validateIfPossibleMovement(step, arrHolder);
+        if(!isOutOfBounds) {
+            System.out.println("You are at the border choose another direction");
+            directionController(generation, row, col);
+        }
+
     }
 
-    // Get the num of times the cell has been green
-    public long getTargetCellMaturity() {
-        return targetCellMaturity;
+    // Set the positions swapping
+    private int[] setTheUpcomingStep(char direction, int[] arr) throws IOException {
+        if (Controls.LEFT.getValue() == direction)
+            arr[0] -= 1;
+
+        if (Controls.RIGHT.getValue() == direction)
+            arr[0] += 1;
+
+        if (Controls.UP.getValue() == direction)
+            arr[1] -= 1;
+
+        if (Controls.DOWN.getValue() == direction)
+            arr[1] += 1;
+
+        if (Controls.QUIT.getValue() == direction)
+            FileManager.saveCurrentGrid(grid);
+
+        return arr;
     }
 }
