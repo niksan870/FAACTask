@@ -1,7 +1,7 @@
 # FAACTask
 
 
-![](screenshots/wasd.png)
-![](screenshots/1.png)
-![](screenshots/2.png)
-![](screenshots/3.png)
+![](assets/wasd.png)
+![](assets/1.png)
+![](assets/2.png)
+![](assets/3.png)
